@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
-# -- Sheet --
 
 !pip install  pydicom
 
-# !pip install pydicom
 import  pydicom as dcm
 import matplotlib.pyplot as plt
+
+
+CT_IMAGE='path_to_CT_image"
 
 # Function to take care of teh translation and windowing. 
 def window_image(img, window_center,window_width, intercept, slope, rescale=True):
@@ -33,12 +32,9 @@ def get_windowing(data):
 
 
 def view_images(file):
-
-
     data = dcm.read_file(file)
     image = data.pixel_array
     window_center , window_width, intercept, slope = get_windowing(data)  
-
     print(window_center , window_width, intercept, slope )
     plt.figure(figsize=(15,15))
     plt.imshow(image,cmap='gray')
@@ -49,7 +45,7 @@ def view_images(file):
 
 
 
-view_images('test.dcm')
+view_images(CT_IMAGE)
 
 
 
