@@ -76,36 +76,73 @@ slices= np.array(slices)
 print(slices.shape)
 
 ########################################## resampling ###############################################
-def get_spacing(path):
+# def get_spacing(path):
 
-    pixel_spacing = [dcm.read_file(os.path.join(path,slice)).PixelSpacing for slice in (os.listdir((path)))][:1]
-    slice_thickness = [dcm.read_file(os.path.join(path,slice)).SliceThickness for slice in (os.listdir((path)))][:1]
+#     pixel_spacing = [dcm.read_file(os.path.join(path,slice)).PixelSpacing for slice in (os.listdir((path)))][:1]
+#     slice_thickness = [dcm.read_file(os.path.join(path,slice)).SliceThickness for slice in (os.listdir((path)))][:1]
     
-    return  pixel_spacing,slice_thickness
+#     return  pixel_spacing,slice_thickness
 
 
-for i,patient in enumerate (os.listdir(path)):
-    pixel_spacing,slice_thickness =get_spacing(os.path.join(path,patient))
+# for i,patient in enumerate (os.listdir(path)):
+#     pixel_spacing,slice_thickness =get_spacing(os.path.join(path,patient))
 
     
-print(pixel_spacing,slice_thickness)
+# print(pixel_spacing,slice_thickness)
 
-def resample(image,pixel_spacing, slice_thickness , new_spacing=[1,1,1]):
+# def resample(image,pixel_spacing, slice_thickness , new_spacing=[1,1,1]):
 
-    spacing = np.array([slice_thickness[0],pixel_spacing[0][0],pixel_spacing[0][1]])
-    resize_factor = spacing / np.array(new_spacing)  
-    new_real_shape = image.shape * resize_factor
-    new_shape = np.round(new_real_shape)
-    real_resize_factor = new_shape / image.shape
-    new_spacing = spacing / real_resize_factor    
-    image = zoom(image, real_resize_factor, mode='nearest')
+#     spacing = np.array([slice_thickness[0],pixel_spacing[0][0],pixel_spacing[0][1]])
+#     resize_factor = spacing / np.array(new_spacing)  
+#     new_real_shape = image.shape * resize_factor
+#     new_shape = np.round(new_real_shape)
+#     real_resize_factor = new_shape / image.shape
+#     new_spacing = spacing / real_resize_factor    
+#     image = zoom(image, real_resize_factor, mode='nearest')
   
     
-    return image
+#     return image
 
+# resampled_slices=[]
+# for patient in range(slices.shape[0]):
+#     resampled_slices.append(resample(slices[patient],pixel_spacing, slice_thickness , new_spacing=[1,1,1]))
+    
+
+# resampled_slices =np.array(resampled_slices)
+
+# resampled_slices.shape
+
+####################### resampling         as i want !!!!!!!!!!!!!!
+
+def resize_volume(img):
+    """Resize across z-axis"""
+    # Set the desired depth
+    desired_depth = 64
+    desired_width = 128
+    desired_height = 128
+    # Get current depth
+    current_depth = img.shape[0]
+    current_width = img.shape[1]
+    current_height = img.shape[2]
+    # print("---------------",img.shape)
+    # Compute depth factor
+    depth = current_depth / desired_depth
+    width = current_width / desired_width
+    height = current_height / desired_height
+    depth_factor = 1 / depth
+    width_factor = 1 / width
+    height_factor = 1 / height
+    # Rotate
+    img = rotate(img, 90, reshape=False)
+    # Resize across z-axis
+    img = zoom(img, (depth_factor,width_factor, height_factor ), order=1)
+    return img
+ 
 resampled_slices=[]
 for patient in range(slices.shape[0]):
-    resampled_slices.append(resample(slices[patient],pixel_spacing, slice_thickness , new_spacing=[1,1,1]))
+    resampled_slices.append(resize_volume(slices[patient]))
+    
+    
     
 
 resampled_slices =np.array(resampled_slices)
