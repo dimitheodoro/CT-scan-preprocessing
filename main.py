@@ -1,11 +1,13 @@
 
-################################################### 3D
+############################################# 3D 
+
 # !pip install pydicom 
 import  pydicom as dcm
 import numpy as np
 import os
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+from scipy.ndimage import zoom
 
 path ='test'
 
@@ -72,22 +74,44 @@ for i,patient in enumerate (os.listdir(path)):
     slices.append(process_scan(os.path.join(path,patient),sorted_dcms[i]))
 
 slices= np.array(slices)
-slices.shape
+print(slices.shape)
+
+########################################## resampling ###############################################
+def get_spacing(path):
+
+    pixel_spacing = [dcm.read_file(os.path.join(path,slice)).PixelSpacing for slice in (os.listdir((path)))][:1]
+    slice_thickness = [dcm.read_file(os.path.join(path,slice)).SliceThickness for slice in (os.listdir((path)))][:1]
+    
+    return  pixel_spacing,slice_thickness
 
 
+for i,patient in enumerate (os.listdir(path)):
+    pixel_spacing,slice_thickness =get_spacing(os.path.join(path,patient))
 
+    
+print(pixel_spacing,slice_thickness)
 
+def resample(image,pixel_spacing, slice_thickness , new_spacing=[1,1,1]):
 
-############# xreiazetai resampling
+    spacing = np.array([slice_thickness[0],pixel_spacing[0][0],pixel_spacing[0][1]])
+    resize_factor = spacing / np.array(new_spacing)  
+    new_real_shape = image.shape * resize_factor
+    new_shape = np.round(new_real_shape)
+    real_resize_factor = new_shape / image.shape
+    new_spacing = spacing / real_resize_factor    
+    image = zoom(image, real_resize_factor, mode='nearest')
+  
+    
+    return image
 
+resampled_slices=[]
+for patient in range(slices.shape[0]):
+    resampled_slices.append(resample(slices[patient],pixel_spacing, slice_thickness , new_spacing=[1,1,1]))
+    
 
+resampled_slices =np.array(resampled_slices)
 
-
-
-
-
-
-
+resampled_slices.shape
 
 
 
