@@ -6,7 +6,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from scipy.ndimage import zoom
+from scipy.ndimage import zoom,rotate
 
 path ='test'
 
@@ -73,9 +73,11 @@ for i,patient in enumerate (os.listdir(path)):
     slices.append(process_scan(os.path.join(path,patient),sorted_dcms[i]))
 
 slices= np.array(slices)
-print(slices.shape)
+slices =np.transpose(slices,(0,2,3,1)) ################# xreiazetai gia to  resampling as i want
+print("final",slices.shape)
 
-########################################## resampling ###############################################
+
+# ########################################## resampling ###############################################
 # def get_spacing(path):
 
 #     pixel_spacing = [dcm.read_file(os.path.join(path,slice)).PixelSpacing for slice in (os.listdir((path)))][:1]
@@ -112,18 +114,19 @@ print(slices.shape)
 
 # resampled_slices.shape
 
-####################### resampling         as i want !!!!!!!!!!!!!!
+
+###################### resampling         as i want !!!!!!!!!!!!!!
 
 def resize_volume(img):
     """Resize across z-axis"""
     # Set the desired depth
     desired_depth = 64
-    desired_width = 128
-    desired_height = 128
+    desired_width = 256
+    desired_height = 256
     # Get current depth
-    current_depth = img.shape[0]
-    current_width = img.shape[1]
-    current_height = img.shape[2]
+    current_depth = img.shape[2]
+    current_width = img.shape[0]
+    current_height = img.shape[1]
     # print("---------------",img.shape)
     # Compute depth factor
     depth = current_depth / desired_depth
@@ -133,9 +136,9 @@ def resize_volume(img):
     width_factor = 1 / width
     height_factor = 1 / height
     # Rotate
-    img = rotate(img, 90, reshape=False)
+    # img = rotate(img, 90, reshape=False)
     # Resize across z-axis
-    img = zoom(img, (depth_factor,width_factor, height_factor ), order=1)
+    img = zoom(img, (width_factor, height_factor ,depth_factor), order=1)
     return img
  
 resampled_slices=[]
@@ -148,7 +151,6 @@ for patient in range(slices.shape[0]):
 resampled_slices =np.array(resampled_slices)
 
 resampled_slices.shape
-
 
 
 
