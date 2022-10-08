@@ -1,6 +1,4 @@
-############################################# 3D 
-
-# !pip install pydicom 
+!pip install pydicom 
 import  pydicom as dcm
 import numpy as np
 import os
@@ -52,6 +50,14 @@ def read_dicom_images(path,sorted_dcm):
 
 
 
+sorted_dcms=[]
+for patient in os.listdir(path):
+    sorted_dcms.append(sort_dicoms(os.path.join(path,patient)))
+
+
+
+
+
 def process_scan(path,sorted_dcm):
     """Read and resize volume"""
     # Read scan
@@ -61,61 +67,24 @@ def process_scan(path,sorted_dcm):
     return volume.astype('float32')
 
 slices=[]
-sorted_dcms=[]
-for patient in os.listdir(path):
-    sorted_dcms.append(sort_dicoms(os.path.join(path,patient)))
 
-sorted_dcms= np.array(sorted_dcms)
-sorted_dcms.shape
 
 for i,patient in enumerate (os.listdir(path)):
 
     slices.append(process_scan(os.path.join(path,patient),sorted_dcms[i]))
 
-slices= np.array(slices)
-slices =np.transpose(slices,(0,2,3,1)) ################# xreiazetai gia to  resampling as i want
-print("final",slices.shape)
+
+for i in range(len(slices)):
+    slices[i]=np.transpose(slices[i],(1,2,0))
+
+# slices= np.array(slices)
+# slices =np.transpose(slices,(0,2,3,1))
+# print("final",slices.shape)
 
 
-# ########################################## resampling ###############################################
-# def get_spacing(path):
-
-#     pixel_spacing = [dcm.read_file(os.path.join(path,slice)).PixelSpacing for slice in (os.listdir((path)))][:1]
-#     slice_thickness = [dcm.read_file(os.path.join(path,slice)).SliceThickness for slice in (os.listdir((path)))][:1]
-    
-#     return  pixel_spacing,slice_thickness
 
 
-# for i,patient in enumerate (os.listdir(path)):
-#     pixel_spacing,slice_thickness =get_spacing(os.path.join(path,patient))
-
-    
-# print(pixel_spacing,slice_thickness)
-
-# def resample(image,pixel_spacing, slice_thickness , new_spacing=[1,1,1]):
-
-#     spacing = np.array([slice_thickness[0],pixel_spacing[0][0],pixel_spacing[0][1]])
-#     resize_factor = spacing / np.array(new_spacing)  
-#     new_real_shape = image.shape * resize_factor
-#     new_shape = np.round(new_real_shape)
-#     real_resize_factor = new_shape / image.shape
-#     new_spacing = spacing / real_resize_factor    
-#     image = zoom(image, real_resize_factor, mode='nearest')
-  
-    
-#     return image
-
-# resampled_slices=[]
-# for patient in range(slices.shape[0]):
-#     resampled_slices.append(resample(slices[patient],pixel_spacing, slice_thickness , new_spacing=[1,1,1]))
-    
-
-# resampled_slices =np.array(resampled_slices)
-
-# resampled_slices.shape
-
-
-###################### resampling         as i want !!!!!!!!!!!!!!
+##################### resampling         as i want !!!!!!!!!!!!!!
 
 def resize_volume(img):
     """Resize across z-axis"""
@@ -142,7 +111,8 @@ def resize_volume(img):
     return img
  
 resampled_slices=[]
-for patient in range(slices.shape[0]):
+
+for patient in range(len(slices)):
     resampled_slices.append(resize_volume(slices[patient]))
     
     
@@ -150,7 +120,7 @@ for patient in range(slices.shape[0]):
 
 resampled_slices =np.array(resampled_slices)
 
-resampled_slices.shape
+print("resampled_slices.shape:",resampled_slices.shape)
 
 
 
