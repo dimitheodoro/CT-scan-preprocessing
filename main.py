@@ -145,8 +145,10 @@ import matplotlib.pyplot as plt
 
 ############################  WITH  SORTED SLICCES ######################################## 
 
+############################  WITH  SORTED SLICCES ######################################## 
 
-path ='lung-ct.volume-3d'
+
+path ='/content/drive/MyDrive/lung-ct.volume-3d'
 
 def sort_dicoms(path):
     acq_times = ([dcm.read_file(os.path.join(path,slice))[('0008','0032')].value for slice in (os.listdir((path)))])
@@ -157,9 +159,7 @@ def sort_dicoms(path):
 
 sorted_dcm = sort_dicoms(path)
 
-
-# Function to take care of teh translation and windowing. 
-def window_image(img, window_center,window_width, intercept, slope, rescale=False):
+def window_image(img, window_center,window_width, intercept, slope, rescale=True):
     img = (img*slope +intercept) #for translation adjustments given in the dicom file. 
     img_min = window_center - window_width//2 #minimum HU level
     img_max = window_center + window_width//2 #maximum HU level
@@ -190,17 +190,22 @@ def read_dicom_images(path,sorted_dcm):
     return  window_image(slices,window_center , window_width, intercept, slope )
 
 
+
 def process_scan(path,sorted_dcm):
     """Read and resize volume"""
     # Read scan
     volume = read_dicom_images(path,sorted_dcm)
     # Resize width, height and depth
-    return volume
 
-slices =process_scan('lung-ct.volume-3d',sorted_dcm)
+    return volume.astype('float32')
 
 
-print(slices.shape)
+
+slices =process_scan(path,sorted_dcm)
+
+
+slices.shape
+
 ########################################## resampling ###############################################
 def get_spacing(path):
 
