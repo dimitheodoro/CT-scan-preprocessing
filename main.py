@@ -25,7 +25,7 @@ def window_image(img, window_center,window_width, intercept, slope, rescale=True
     img[img<img_min] = img_min #set img_min for all HU levels less than minimum HU level
     img[img>img_max] = img_max #set img_max for all HU levels higher than maximum HU level
     if rescale: 
-        img = (img - img_min) / (img_max - img_min)*255.0 
+        img = (img - img_min) / (img_max - img_min)
     return img
     
 def get_first_of_dicom_field_as_int(x):
@@ -153,7 +153,7 @@ def window_image(img, window_center,window_width, intercept, slope, rescale=True
     img[img<img_min] = img_min #set img_min for all HU levels less than minimum HU level
     img[img>img_max] = img_max #set img_max for all HU levels higher than maximum HU level
     if rescale: 
-        img = (img - img_min) / (img_max - img_min)*255.0 
+        img = (img - img_min) / (img_max - img_min)
     return img
     
 def get_first_of_dicom_field_as_int(x):
