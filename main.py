@@ -134,19 +134,6 @@ print("resampled_slices.shape:",resampled_slices.shape)
 ######################################################## 2D
 
 ######################################################## 2D
-######################################################## 2D
-
-
-import numpy as np
-from scipy import ndimage
-!pip install pydicom
-import  pydicom as dcm
-import matplotlib.pyplot as plt
-
-############################  WITH  SORTED SLICCES ######################################## 
-
-############################  WITH  SORTED SLICCES ######################################## 
-
 
 path ='/content/drive/MyDrive/lung-ct.volume-3d'
 
@@ -202,9 +189,48 @@ def process_scan(path,sorted_dcm):
 
 
 slices =process_scan(path,sorted_dcm)
+slices =np.transpose(slices,(1,2,0))
 
+########################################## resampling as i want ###############################################
 
 slices.shape
+
+from scipy.ndimage import zoom,rotate
+
+def resize_volume(img):
+    """Resize across z-axis"""
+    # Set the desired depth
+    desired_depth = 64
+    desired_width = 128
+    desired_height = 128
+    # Get current depth
+    current_depth = img.shape[2]
+    current_width = img.shape[0]
+    current_height = img.shape[1]
+    # print("---------------",img.shape)
+    # Compute depth factor
+    depth = current_depth / desired_depth
+    width = current_width / desired_width
+    height = current_height / desired_height
+    depth_factor = 1 / depth
+    width_factor = 1 / width
+    height_factor = 1 / height
+    # Rotate
+    # img = rotate(img, 90, reshape=False)
+    # Resize across z-axis
+    img = zoom(img, (width_factor, height_factor ,depth_factor), order=1)
+    return img
+ 
+
+    
+
+resampled_slices = resize_volume(slices)
+
+print("resampled_slices.shape:",resampled_slices.shape)
+
+
+
+
 
 ########################################## resampling ###############################################
 def get_spacing(path):
